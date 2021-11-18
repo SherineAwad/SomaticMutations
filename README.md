@@ -3,7 +3,7 @@ Snakemake Workflow for somatic mutation calling from RNASeq Analysis
 
 
 This is an Somatic mutation calling from RNASeq snakemake pipeline written by Sherine Awad. 
-The pipeline so far uses GATK/Mutect2. More tools in the way. 
+The pipeline so far uses GATK4/Mutect2. More tools in the way. 
 
 #### Edit config file 
 

@@ -1,4 +1,3 @@
-SAMPLES: ['n1', 't1']
 GENOME: "/home/ec2-user/GATK_Resources/Homo_sapiens_assembly38.fasta"
 DBSNP: "/home/ec2-user/GATK_Resources/Homo_sapiens_assembly38.dbsnp138.vcf"
 INDELS: "/home/ec2-user/GATK_Resources/Homo_sapiens_assembly38.known_indels.vcf"
