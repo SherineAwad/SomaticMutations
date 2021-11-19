@@ -1,6 +1,5 @@
 import pandas as pd
 
-#m = pd.read_csv("inputs/samples.tsv", sep = "\t", header = 0)
 df= pd.read_csv('inputs/samples.tsv', delimiter='\t')
 dict = dict(df.values)
 TUMORS =[] 
@@ -20,7 +19,7 @@ def return_pair(wildcards):
 
 rule all: 
    input:
-       expand("galore/{sample}_trimmed.fq", sample = TUMORS), 
+       expand("galore/{sample}_trimmed.fq.gz", sample = TUMORS), 
        expand("{sample}.sam", sample = TUMORS),
        expand("{sample}.RG.sam", sample = TUMORS),
        expand("{sample}.dedupped.bam", sample = TUMORS),
@@ -28,7 +27,7 @@ rule all:
        expand("{sample}.recal_data.table", sample = TUMORS),
        expand("{sample}.recalibrated.bam", sample = TUMORS),
        #Same for Normals 
-       expand("galore/{sample}_trimmed.fq", sample = NORMALS),
+       expand("galore/{sample}_trimmed.fq.gz", sample = NORMALS),
        expand("{sample}.sam", sample = NORMALS),
        expand("{sample}.RG.sam", sample = NORMALS),
        expand("{sample}.dedupped.bam", sample = NORMALS),
@@ -43,25 +42,25 @@ rule trim:
     input:
        "{sample}.fq",
     output:
-      "galore/{sample}_trimmed.fq",
+      "galore/{sample}_trimmed.fq.gz",
     conda: "env/env-trim.yaml"
     shell:
          """
-          trim_galore --gzip --retain_unpaired --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore --paired {input} 
+          trim_galore --gzip --retain_unpaired --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore {input} 
          """
-rule align: 
-    input: 
-       "galore/{sample}_trimmed.fq"
-    output: 
-       "{sample}.sam" 
+
+rule tosam:
+    input:
+       "galore/{sample}_trimmed.fq.gz"
+    output:
+        "{sample}.sam"
     params: 
-        threads = 2 ,#config['THREADS'], 
-        gtf = config['GTF'], 
-        prefix = "{sample}"
-    shell: 
-        """
-        STAR --genomeDir StarGRCh38Index --runThreadN {params.threads} --readFilesIn {input}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
-        """         
+       genome = config['GENOME'], 
+       mem = config['MEMORY']
+    shell:
+       """
+       bbmap.sh {params.mem} in={input} out={output} ref={params.genome}
+       """ 
 
 rule AddRG:
     input:
@@ -69,11 +68,11 @@ rule AddRG:
     output:
        "{sample}.RG.sam"
     params:
-        RG = config['RG']
+       RG = config['RG']
     conda: "env/env-picard.yaml"
     shell:
         """
-         picard AddOrReplaceReadGroups I={input} O={output} SO=coordinate RGID=@{params} RGSM={wildcards.sample} RGPL=Illumina RGLB={wildcards.sample} RGPU={params}_{wildcards.sample} VALIDATION_STRINGENCY=SILENT
+        picard AddOrReplaceReadGroups I={input} O={output} SO=coordinate RGID=@{params} RGSM={wildcards.sample} RGPL=Illumina RGLB={wildcards.sample} RGPU={params}_{wildcards.sample} VALIDATION_STRINGENCY=SILENT
         """
 
 rule deduplicate: 
