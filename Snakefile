@@ -40,7 +40,7 @@ rule all:
 
 rule trim:
     input:
-       "{sample}.fq",
+       "{sample}.fastq",
     output:
       "galore/{sample}_trimmed.fq.gz",
     conda: "env/env-trim.yaml"
@@ -90,7 +90,7 @@ rule split:
     input: 
        "{sample}.dedupped.bam" 
     params: 
-       genome = expand("{genome}.fa", genome= config['GENOME'])
+       genome= config['GENOME']
     output: 
        "{sample}.split.bam" 
     shell: 
@@ -102,7 +102,7 @@ rule recalibrate_a:
     input:
        "{sample}.split.bam"
     params:
-        genome = expand("{genome}.fa", genome= config['GENOME']),
+        genome= config['GENOME'],
         DBSNP = config['DBSNP'],
         INDELS = config['INDELS'],
         GOLD_STANDARD = config['GOLD_STANDARD'] 
@@ -117,7 +117,7 @@ rule recalibrate_b:
     input: 
        "{sample}.recal_data.table"
     params: 
-       genome = expand("{genome}.fa", genome= config['GENOME']), 
+       genome= config['GENOME'], 
     output: 
        "{sample}.recalibrated.bam"
     shell: 
@@ -129,7 +129,7 @@ rule Mutect2:
      input: 
          "{sample}.recalibrated.bam"
      params: 
-        genome= expand("{genome}.fa", genome= config['GENOME']),
+        genome= config['GENOME'],
         AFONLYGNOMAD = config['AFONLYGNOMAD']
      output: 
          "{sample}_pon.vcf.gz"
@@ -142,7 +142,7 @@ rule PON_DB:
      input:
          sample = expand("{sample}_pon.vcf.gz", sample = NORMALS),
      params:
-         genome= expand("{genome}.fa", genome= config['GENOME']),
+         genome= config['GENOME'],
          mem = {"-Xmx100g"},
          intervals = config['INTERVALS'],
          I =  lambda w: "-V " + " -V ".join(expand("{sample}_pon.vcf.gz", sample =NORMALS))
@@ -160,7 +160,7 @@ rule panel_normals:
        normal_panel= config['NORMALS_PANEL']
     params:
        AFONLYGNOMAD = config['AFONLYGNOMAD'],
-       genome= expand("{genome}.fa", genome= config['GENOME']),
+       genome= config['GENOME'],
     shell:
        """
        gatk CreateSomaticPanelOfNormals -R {params.genome} --germline-resource {params.AFONLYGNOMAD} -V gendb://{input.pon_db} -O {output} 
@@ -169,7 +169,7 @@ rule somatic_call:
      input: 
          unpack(return_pair)
      params:
-        genome = expand("{genome}.fa", genome= config['GENOME']),
+        genome= config['GENOME'],
         AFONLYGNOMAD = config['AFONLYGNOMAD'],
         pon=config['NORMALS_PANEL'],
         prefix = lambda wildcards: dict[wildcards.sample] 
