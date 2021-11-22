@@ -20,7 +20,7 @@ def return_pair(wildcards):
 rule all: 
    input:
        expand("galore/{sample}_trimmed.fq.gz", sample = TUMORS), 
-       expand("{sample}.sam", sample = TUMORS),
+       expand("{sample}_Aligned.out.sam", sample = TUMORS),
        expand("{sample}.RG.sam", sample = TUMORS),
        expand("{sample}.dedupped.bam", sample = TUMORS),
        expand("{sample}.split.bam", sample = TUMORS),
@@ -28,7 +28,7 @@ rule all:
        expand("{sample}.recalibrated.bam", sample = TUMORS),
        #Same for Normals 
        expand("galore/{sample}_trimmed.fq.gz", sample = NORMALS),
-       expand("{sample}.sam", sample = NORMALS),
+       expand("{sample}_Aligned.out.sam", sample = NORMALS),
        expand("{sample}.RG.sam", sample = NORMALS),
        expand("{sample}.dedupped.bam", sample = NORMALS),
        expand("{sample}.split.bam", sample = NORMALS),
@@ -44,27 +44,31 @@ rule trim:
     output:
       "galore/{sample}_trimmed.fq.gz",
     conda: "env/env-trim.yaml"
+    params: 
+      adapters = config['ADAPTERS']
     shell:
          """
-          trim_galore --gzip --retain_unpaired --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore {input} 
+          trim_galore --gzip --retain_unpaired -a {params.adapters} --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore {input} 
          """
 
-rule tosam:
+rule align:
     input:
        "galore/{sample}_trimmed.fq.gz"
     output:
-        "{sample}.sam"
-    params: 
-       genome = config['GENOME'], 
-       mem = config['MEMORY']
+       "{sample}_Aligned.out.sam"
+    params:
+        threads = config['THREADS'],
+        gtf = config['GTF'],
+        prefix = "{sample}_",
+        index = config['INDEX']
     shell:
-       """
-       bbmap.sh {params.mem} in={input} out={output} ref={params.genome}
-       """ 
+        """
+        STAR --genomeDir {params.index} --runThreadN {params.threads} --readFilesIn {input}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
+        """
 
 rule AddRG:
     input:
-       "{sample}.sam"
+       "{sample}_Aligned.out.sam"
     output:
        "{sample}.RG.sam"
     params:
@@ -122,7 +126,7 @@ rule recalibrate_b:
        "{sample}.recalibrated.bam"
     shell: 
       """ 
-        gatk ApplyBQSR -I {input} -R {params.genome} --bqsr-recal-file {input} -O {output}
+        gatk ApplyBQSR -I {input} -R {params.genome} --bqsr-recal-file {input} --disable-sequence-dictionary-validation -O {output}
       """
 
 rule Mutect2:
@@ -130,12 +134,13 @@ rule Mutect2:
          "{sample}.recalibrated.bam"
      params: 
         genome= config['GENOME'],
-        AFONLYGNOMAD = config['AFONLYGNOMAD']
+        AFONLYGNOMAD = config['AFONLYGNOMAD'],
+        prefix = "{sample}"
      output: 
          "{sample}_pon.vcf.gz"
      shell:
         """
-        gatk Mutect2 -R {params.genome}  -I {input} --max-mnp-distance 0 --germline-resource {params.AFONLYGNOMAD} -O {output}
+        gatk Mutect2 -R {params.genome}  -I {input} -tumor {params.prefix} --max-mnp-distance 0 --germline-resource {params.AFONLYGNOMAD} -O {output}
         """
 
 rule PON_DB:
