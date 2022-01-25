@@ -1,13 +1,12 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥6.0.2-brightgreen.svg)](https://snakemake.github.io)
-[![Documentation Status](https://readthedocs.org/projects/ribofilio/badge/)](http://dammit.readthedocs.io/en/latest)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
-Snakemake Workflow for somatic mutation calling from RNASeq Analysis 
+Snakemake Workflow for somatic mutation calling 
 ==========================================================================
 
 
-This is an Somatic mutation calling from RNASeq snakemake pipeline written by Sherine Awad. 
+This is an Somatic mutation calling snakemake pipeline written by Sherine Awad. 
 The pipeline so far uses GATK4/Mutect2. More tools in the way. 
 The pipeline is under progressive updates and will update this message accordingly. 
 

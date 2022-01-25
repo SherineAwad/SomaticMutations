@@ -2,14 +2,16 @@ import pandas as pd
 
 df= pd.read_csv('inputs/samples.tsv', delimiter='\t')
 dict = dict(df.values)
+print("df is", df)
+print("dict is", dict)
 TUMORS =[] 
 NORMALS = []
 for key in dict.keys(): 
      TUMORS.append(key)
      NORMALS.append(dict[key])
 
-print("dict is" , dict) 
-print(TUMORS, NORMALS)
+print("Tumors are:", TUMORS)
+print("Normals are:",  NORMALS)
 def return_pair(wildcards):
        tumor = ''.join({wildcards.sample})
        normal= dict[tumor]
@@ -19,52 +21,80 @@ def return_pair(wildcards):
 
 rule all: 
    input:
-       expand("galore/{sample}_trimmed.fq.gz", sample = TUMORS), 
        expand("{sample}_Aligned.out.sam", sample = TUMORS),
-       expand("{sample}.RG.sam", sample = TUMORS),
-       expand("{sample}.dedupped.bam", sample = TUMORS),
-       expand("{sample}.split.bam", sample = TUMORS),
-       expand("{sample}.recal_data.table", sample = TUMORS),
-       expand("{sample}.recalibrated.bam", sample = TUMORS),
-       #Same for Normals 
-       expand("galore/{sample}_trimmed.fq.gz", sample = NORMALS),
+       #expand("{sample}.RG.sam", sample = TUMORS),
+       #expand("{sample}.dedupped.bam", sample = TUMORS),
+       #expand("{sample}.split.bam", sample = TUMORS),
+       #expand("{sample}.recal_data.table", sample = TUMORS),
+       #expand("{sample}.recalibrated.bam", sample = TUMORS),
+       ##Same for Normals 
        expand("{sample}_Aligned.out.sam", sample = NORMALS),
-       expand("{sample}.RG.sam", sample = NORMALS),
-       expand("{sample}.dedupped.bam", sample = NORMALS),
-       expand("{sample}.split.bam", sample = NORMALS),
-       expand("{sample}.recal_data.table", sample = NORMALS),
-       expand("{sample}.recalibrated.bam", sample = NORMALS),
-       expand("{sample}_pon.vcf.gz", sample =NORMALS),
-       #Create Panel of Normals 
-       expand("{sample}_somatics.vcf.gz", sample =TUMORS)
-
-rule trim:
-    input:
-       "{sample}.fastq",
-    output:
-      "galore/{sample}_trimmed.fq.gz",
-    conda: "env/env-trim.yaml"
-    params: 
-      adapters = config['ADAPTERS']
-    shell:
-         """
-          trim_galore --gzip --retain_unpaired -a {params.adapters} --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore {input} 
-         """
-
-rule align:
-    input:
-       "galore/{sample}_trimmed.fq.gz"
-    output:
-       "{sample}_Aligned.out.sam"
-    params:
-        threads = config['THREADS'],
-        gtf = config['GTF'],
-        prefix = "{sample}_",
-        index = config['INDEX']
-    shell:
-        """
-        STAR --genomeDir {params.index} --runThreadN {params.threads} --readFilesIn {input}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
-        """
+       #expand("{sample}.RG.sam", sample = NORMALS),
+       #expand("{sample}.dedupped.bam", sample = NORMALS),
+       #expand("{sample}.split.bam", sample = NORMALS),
+       #expand("{sample}.recal_data.table", sample = NORMALS),
+       #expand("{sample}.recalibrated.bam", sample = NORMALS),
+       #expand("{sample}_pon.vcf.gz", sample =NORMALS),
+       ##Create Panel of Normals 
+       #expand("{sample}_somatics.vcf.gz", sample =TUMORS)
+       
+if config['PAIRED']:
+    rule trim:
+       input:
+           r1 = "{sample}.r_1.fq.gz",
+           r2 = "{sample}.r_2.fq.gz"
+       output:
+           "galore/{sample}.r_1_val_1.fq.gz",
+           "galore/{sample}.r_2_val_2.fq.gz"
+       conda: 'env/env-trim.yaml'
+       shell:
+           """
+           mkdir -p galore
+           mkdir -p fastqc
+           trim_galore --gzip --retain_unpaired --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore --paired {input.r1} {input.r2}
+           """
+    rule align:
+       input:
+          r1 = "galore/{sample}.r_1_val_1.fq.gz",
+          r2 = "galore/{sample}.r_2_val_2.fq.gz"
+       output:
+             "{sample}_Aligned.out.sam"
+       params:
+            threads = config['THREADS'],
+            gtf = config['GTF'],
+            prefix = "{sample}_",
+            index = config['INDEX']
+       shell:
+            """
+            STAR --genomeDir {params.index} --runThreadN {params.threads} --readFilesCommand zcat --readFilesIn {input.r1} {input.r2}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
+            """
+else:
+     rule trim:
+       input:
+           "{sample}.fq.gz",
+       output:
+           "galore/{sample}_trimmed.fq.gz",
+       conda: 'env/env-trim.yaml'
+       shell:
+           """
+           mkdir -p galore
+           mkdir -p fastqc
+           trim_galore --gzip --retain_unpaired --trim1 --fastqc --fastqc_args "--outdir fastqc" -o galore {input}
+           """
+     rule align:
+         input:
+             "galore/{sample}_trimmed.fq.gz"
+         output:
+             "{sample}_Aligned.out.sam"
+         params:
+            threads = config['THREADS'],
+            gtf = config['GTF'],
+            prefix = "{sample}_",
+            index = config['INDEX']
+         shell:
+            """
+            STAR --genomeDir {params.index} --runThreadN {params.threads} --readFilesCommand zcat --readFilesIn {input}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
+            """
 
 rule AddRG:
     input:
@@ -90,21 +120,10 @@ rule deduplicate:
         picard MarkDuplicates I={input} O={output[0]}  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={output[1]} 
         """
 
-rule split: 
-    input: 
-       "{sample}.dedupped.bam" 
-    params: 
-       genome= config['GENOME']
-    output: 
-       "{sample}.split.bam" 
-    shell: 
-       """
-       gatk SplitNCigarReads -R {params.genome} -I {input} -O {output} 
-       """
 
 rule recalibrate_a: 
     input:
-       "{sample}.split.bam"
+       "{sample}.dedupped.bam"
     params:
         genome= config['GENOME'],
         DBSNP = config['DBSNP'],
@@ -155,7 +174,7 @@ rule PON_DB:
         pon_db = config['PON_DB']
      shell:
          """
-         gatk --java-options {params.mem}  GenomicsDBImport -R {params.genome} --genomicsdb-workspace-path {output.pon_db} -L {params.intervals}
+         gatk --java-options {params.mem}  GenomicsDBImport -R {params.genome} --genomicsdb-workspace-path {output.pon_db} -L {params.intervals} {params.I} 
          """
 
 rule panel_normals:
@@ -184,4 +203,38 @@ rule somatic_call:
         """
          gatk Mutect2 -R {params.genome} -I {input.tumor} -I {input.normal} -normal {params.prefix} --germline-resource {params.AFONLYGNOMAD}  --panel-of-normals {params.pon} -O {output}
         """ 
+
+ 
+rule GetPileupSummaries: 
+   input:  
+       "{sample}.bam"
+   params: 
+        config['GNOMAD_BIALLELIC']
+   output: 
+       "{sample}.getpileupsummaries.table"
+   shell: 
+       """
+        gatk GetPileupSummaries -I {input} -V {params} -O {output}
+       """ 
+
+rule CalculateContamination:
+    input: 
+       "{sample}_getpileupsummaries.table"
+    output:
+       "{sample}_tumor_calculatecontamination.table"
+    shell: 
+        """
+        gatk CalculateContamination -I {input} -O {output}
+        """
+
+rule Filter: 
+    input: 
+      "{sample}_tumor_calculatecontamination.table",
+      "{sample}_somatics.vcf.gz"
+    output: 
+       "{sample}_somatic_oncefiltered.vcf.gz"
+    shell: 
+      """
+       gatk FilterMutectCalls -V {input[1]} --contamination-table {input[0]} -O {output} 
+      """
 
