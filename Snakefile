@@ -22,21 +22,19 @@ def return_pair(wildcards):
 rule all: 
    input:
        expand("{sample}_Aligned.out.sam", sample = TUMORS),
-       #expand("{sample}.RG.sam", sample = TUMORS),
-       #expand("{sample}.dedupped.bam", sample = TUMORS),
-       #expand("{sample}.split.bam", sample = TUMORS),
-       #expand("{sample}.recal_data.table", sample = TUMORS),
-       #expand("{sample}.recalibrated.bam", sample = TUMORS),
-       ##Same for Normals 
        expand("{sample}_Aligned.out.sam", sample = NORMALS),
-       #expand("{sample}.RG.sam", sample = NORMALS),
-       #expand("{sample}.dedupped.bam", sample = NORMALS),
-       #expand("{sample}.split.bam", sample = NORMALS),
-       #expand("{sample}.recal_data.table", sample = NORMALS),
-       #expand("{sample}.recalibrated.bam", sample = NORMALS),
-       #expand("{sample}_pon.vcf.gz", sample =NORMALS),
-       ##Create Panel of Normals 
-       #expand("{sample}_somatics.vcf.gz", sample =TUMORS)
+       expand("{sample}.RG.sam", sample = TUMORS),
+       expand("{sample}.RG.sam", sample = NORMALS),
+       expand("{sample}.dedupped.bam", sample = TUMORS),
+       expand("{sample}.dedupped.bam", sample = NORMALS),
+       expand("{sample}.recal_data.table", sample = TUMORS),
+       expand("{sample}.recal_data.table", sample = NORMALS),
+       expand("{sample}.recalibrated.bam", sample = TUMORS),
+       expand("{sample}.recalibrated.bam", sample = NORMALS),
+       #Create Panel Of Normals
+       expand("{panel}", panel=config['NORMALS_PANEL']),
+       expand("{sample}_pon.vcf.gz", sample =NORMALS),
+       expand("{sample}_somatics.vcf.gz", sample =TUMORS)
        
 if config['PAIRED']:
     rule trim:
@@ -137,7 +135,8 @@ rule recalibrate_a:
        """
 
 rule recalibrate_b: 
-    input: 
+    input:
+       "{sample}.dedupped.bam", 
        "{sample}.recal_data.table"
     params: 
        genome= config['GENOME'], 
@@ -145,7 +144,7 @@ rule recalibrate_b:
        "{sample}.recalibrated.bam"
     shell: 
       """ 
-        gatk ApplyBQSR -I {input} -R {params.genome} --bqsr-recal-file {input} --disable-sequence-dictionary-validation -O {output}
+        gatk ApplyBQSR -I {input[0]} -R {params.genome} --bqsr-recal-file {input[1]} --disable-sequence-dictionary-validation -O {output}
       """
 
 rule Mutect2:
@@ -191,17 +190,18 @@ rule panel_normals:
        """
 rule somatic_call: 
      input: 
-         unpack(return_pair)
+         unpack(return_pair), 
+         pon = config['NORMALS_PANEL'],
      params:
         genome= config['GENOME'],
         AFONLYGNOMAD = config['AFONLYGNOMAD'],
-        pon=config['NORMALS_PANEL'],
+        #pon=config['NORMALS_PANEL'],
         prefix = lambda wildcards: dict[wildcards.sample] 
      output: 
          "{sample}_somatics.vcf.gz"
      shell: 
         """
-         gatk Mutect2 -R {params.genome} -I {input.tumor} -I {input.normal} -normal {params.prefix} --germline-resource {params.AFONLYGNOMAD}  --panel-of-normals {params.pon} -O {output}
+         gatk Mutect2 -R {params.genome} -I {input.tumor} -I {input.normal} -normal {params.prefix} --germline-resource {params.AFONLYGNOMAD}  --panel-of-normals {input.pon} -O {output}
         """ 
 
  
