@@ -34,8 +34,9 @@ rule all:
        #Create Panel Of Normals
        expand("{panel}", panel=config['NORMALS_PANEL']),
        expand("{sample}_pon.vcf.gz", sample =NORMALS),
-       expand("{sample}_somatics.vcf.gz", sample =TUMORS)
-       
+       expand("{sample}_somatics.vcf.gz", sample =TUMORS),
+       expand("{sample}_somatic_oncefiltered.vcf.gz", sample =TUMORS) 
+
 if config['PAIRED']:
     rule trim:
        input:
@@ -207,11 +208,11 @@ rule somatic_call:
  
 rule GetPileupSummaries: 
    input:  
-       "{sample}.bam"
+       "{sample}.recalibrated.bam"
    params: 
         config['GNOMAD_BIALLELIC']
    output: 
-       "{sample}.getpileupsummaries.table"
+       "{sample}_getpileupsummaries.table"
    shell: 
        """
         gatk GetPileupSummaries -I {input} -V {params} -O {output}
@@ -227,7 +228,7 @@ rule CalculateContamination:
         gatk CalculateContamination -I {input} -O {output}
         """
 
-rule Filter: 
+rule FilterMutectCalls: 
     input: 
       "{sample}_tumor_calculatecontamination.table",
       "{sample}_somatics.vcf.gz"
