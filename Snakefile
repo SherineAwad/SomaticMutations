@@ -205,17 +205,28 @@ rule somatic_call:
          gatk Mutect2 -R {params.genome} -I {input.tumor} -I {input.normal} -normal {params.prefix} --germline-resource {params.AFONLYGNOMAD}  --panel-of-normals {input.pon} -O {output}
         """ 
 
- 
+rule SelectVariants:
+   params: 
+      gnomad = config['GNOMAD'], 
+      genome = config['GENOME']
+   output: 
+       config['GNOMAD_BIALLELIC']
+   shell: 
+      """
+       gatk SelectVariants -R {params.genome} -V {params.gnomad} --restrict-alleles-to biallelic -O {output}
+      """   
+
 rule GetPileupSummaries: 
    input:  
-       "{sample}.recalibrated.bam"
+       "{sample}.recalibrated.bam",
+       config['GNOMAD_BIALLELIC']
    params: 
-        config['GNOMAD_BIALLELIC']
+        config['INTERVALS'] 
    output: 
        "{sample}_getpileupsummaries.table"
    shell: 
        """
-        gatk GetPileupSummaries -I {input} -V {params} -O {output}
+        gatk GetPileupSummaries -I {input[0]} -V {input[1]} -L {params} -O {output}
        """ 
 
 rule CalculateContamination:

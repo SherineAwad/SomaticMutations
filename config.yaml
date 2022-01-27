@@ -6,6 +6,7 @@ GOLD_STANDARD: "/rds/project/rds-O11U8YqSuCk/SM/annotations/gatkresources/Mills_
 INDEX: "/rds/project/rds-O11U8YqSuCk/SM/annotations/StarGRCh38Index"
 ADAPTERS: "CTGTAGGCACCATCAAT"
 PAIRED: 'TRUE'
+GNOMAD: "/rds/project/rds-O11U8YqSuCk/SM/annotations/GNOMAD/gnomad.genomes.r2.1.1.sites.liftover_grch38.vcf"
 GNOMAD_BIALLELIC: "gnomad_biallelic.vcf.gz"
 RG: ""
 INTERVALS: "intervals.list" 
