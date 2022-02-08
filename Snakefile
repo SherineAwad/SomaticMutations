@@ -34,7 +34,9 @@ rule all:
        #Create Panel Of Normals
        expand("{panel}", panel=config['NORMALS_PANEL']),
        expand("{sample}_pon.vcf.gz", sample =NORMALS),
+       #Make Somatic Calls 
        expand("{sample}_somatics.vcf.gz", sample =TUMORS),
+       #Filter Mutect Call
        expand("{sample}_somatic_oncefiltered.vcf.gz", sample =TUMORS) 
 
 if config['PAIRED']:
@@ -213,7 +215,7 @@ rule SelectVariants:
        config['GNOMAD_BIALLELIC']
    shell: 
       """
-       gatk SelectVariants -R {params.genome} -V {params.gnomad} --restrict-alleles-to biallelic -O {output}
+       gatk SelectVariants -R {params.genome} -V {params.gnomad} --restrict-alleles-to BIALLELIC -O {output}
       """   
 
 rule GetPileupSummaries: 
@@ -243,10 +245,12 @@ rule FilterMutectCalls:
     input: 
       "{sample}_tumor_calculatecontamination.table",
       "{sample}_somatics.vcf.gz"
+    params:
+      genome= config['GENOME'] 
     output: 
        "{sample}_somatic_oncefiltered.vcf.gz"
     shell: 
       """
-       gatk FilterMutectCalls -V {input[1]} --contamination-table {input[0]} -O {output} 
+       gatk FilterMutectCalls -R {params} -V {input[1]} --contamination-table {input[0]} -O {output} 
       """
 
