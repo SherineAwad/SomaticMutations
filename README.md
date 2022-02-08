@@ -5,15 +5,13 @@
 Snakemake Workflow for somatic mutation calling 
 ==========================================================================
 
-
-This is an Somatic mutation calling snakemake pipeline written by Sherine Awad. 
-The pipeline so far uses GATK4/Mutect2. More tools in the way. 
-The pipeline is under progressive updates and will update this message accordingly. 
+The is GATK4/Mutect2 pipeline for Somatic Muatation. 
 
 #### Edit config file 
 
-The config file has several sections. You will need to edit the general section and add your tumor/normal paired samples in inputs/samples.tsv. 
-
+The config file has several sections. You will need to edit the general section and add your tumor/normal paired samples in samples.tsv.
+You can change samples.tsv in the config file. AS Well as edit the config files for many other parameters.
+ 
 #### Run Snakemake pipeline 
 
 Once you edit the config file to match your needs, then:  
