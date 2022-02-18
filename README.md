@@ -5,7 +5,7 @@
 Snakemake Workflow for somatic mutation calling 
 ==========================================================================
 
-The is GATK4/Mutect2 pipeline for Somatic Muatation. 
+The is GATK4/Mutect2 pipeline for Somatic Mutation. 
 
 #### Edit config file 
 
