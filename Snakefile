@@ -1,6 +1,7 @@
 import pandas as pd
 
-df= pd.read_csv('inputs/samples.tsv', delimiter='\t')
+input = config['SAMPLES']
+df= pd.read_csv(input, delimiter='\t')
 dict = dict(df.values)
 print("df is", df)
 print("dict is", dict)

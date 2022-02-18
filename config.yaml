@@ -1,3 +1,4 @@
+SAMPLES: "samples.tsv"
 GENOME: "/rds/project/rds-O11U8YqSuCk/SM/annotations/gatkresources/Homo_sapiens_assembly38.fasta"
 GTF: "/rds/project/yhbl2/rds-yhbl2-genehunter/SM/annotations/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/genes.gtf"
 DBSNP: "/rds/project/rds-O11U8YqSuCk/SM/annotations/gatkresources/Homo_sapiens_assembly38.dbsnp138.vcf"
