@@ -1,5 +1,6 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥6.0.2-brightgreen.svg)](https://snakemake.github.io)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/429488694.svg)](https://zenodo.org/badge/latestdoi/429488694)
 
 
 Snakemake Workflow for somatic mutation calling 
@@ -104,5 +105,12 @@ You can try the following to keep going if any issues happen, like no variants i
 
     snakemake -j 10 --keep-going --stats run.stats
 
+
+### Citation 
+
+If you use this pipeline, please cite us as follows: 
+
+    
+    Sherine Awad. (2022). SherineAwad/SomaticMutations: v1.0.0 (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.6202482
 
  
