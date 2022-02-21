@@ -25,16 +25,18 @@ The **samples.tsv** has the following format:
    :widths: 35 35 
    :header-rows: 1
 
-   * - Heading TUMORS,  NORMALS
+   * - Heading TUMORS
+    -  Heading NORMALS
    * - Row 1, SLX-18967.UDP0126.HT3G5DMXX.s_1
      - Row 1, SLX-18967.UDP0129.HT3G5DMXX.s_1
    * - Row 2, SLX-18967.UDP0146.HT3G5DMXX.s_1
      - Row 2, SLX-18967.UDP0149.HT3G5DMXX.s_1
 
 You will need to edit the names and directory of your genome, your genome index, GTF, adapters, read groups in the GENOME, INDEX, GTF, ADAPTERS,  and RG entries in the *config file* respectively. 
-You will also need to have your DBSNP vcf, indels vc, gold standard vcfs, and AF only gnomAD in the DBSNP, INDELS, GOLD_STANDARD, and AFONLYGNOMAD entries respectively  in the *config file*. If you are using human genome, this can be pulled from broadinstitute resource bundles below:
+You will also need to have your DBSNP vcf, indels vc, gold standard vcfs, and AF only gnomAD in the DBSNP, INDELS, GOLD_STANDARD, and AFONLYGNOMAD entries respectively  in the *config file*. If you are using human genome, this can be pulled from broadinstitute Get the latest news at `Resource Bundle`_.
 
-   `Resource Bundle <https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle>`
+.. _Resource Bundle: https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle
+
 
 You need to update your interval list, by editing the **intervals.list** file to list only the chromosomes of interest. You can change the name of this file by editing the *config file* entry **INTERVALS**.
 	
