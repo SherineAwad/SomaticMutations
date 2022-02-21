@@ -21,13 +21,9 @@ You need to update the *config file* with whether your samples are paired-end or
 
 The **samples.tsv** has the following format:
 
-|------|---------|
 Tumors | Normals |
-|------|---------|
 SLX-18967.UDP0126.HT3G5DMXX.s_1| SLX-18967.UDP0129.HT3G5DMXX.s_1 |
-|------------------------------|---------------------------------|
 SLX-18967.UDP0146.HT3G5DMXX.s_1| SLX-18967.UDP0149.HT3G5DMXX.s_1 |
-|------------------------------|---------------------------------|
 
 
 You will need to edit the names and directory of your genome, your genome index, GTF, adapters, read groups in the GENOME, INDEX, GTF, ADAPTERS,  and RG entries in the *config file* respectively. 
