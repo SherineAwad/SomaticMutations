@@ -7,7 +7,7 @@ Snakemake Workflow for somatic mutation calling
 
 The is GATK4/Mutect2 pipeline for Somatic Mutation. 
 
-#### Requirments 
+### Requirments 
 
 - trim-galore=0.6.6
 - star=2.7.10a
@@ -16,7 +16,7 @@ The is GATK4/Mutect2 pipeline for Somatic Mutation.
 
 You can run the pipeline in -use-conda mode to pull these tools automatically. See use conde section below.
 
-#### Edit config file 
+### Edit config file 
 
 You will need to edit the *config file* to match your samples and paramteres. 
 
@@ -43,7 +43,7 @@ You need to update your interval list, by editing the **intervals.list** file to
 The pipeline will automatically pull the biallelic gnomAD. You can change its name/location by editing the **GNOMAD_BIALLELIC** entry in the *config file*. 
 
 
-#### Run Snakemake pipeline 
+### Run Snakemake pipeline 
 
 Once you edit the config file to match your needs, then:  
 
