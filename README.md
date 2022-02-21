@@ -21,16 +21,14 @@ You need to update the *config file* with whether your samples are paired-end or
 
 The **samples.tsv** has the following format:
 
-.. list-table:: samples.tsv
-   :widths: 35 35 
-   :header-rows: 1
+|------|---------|
+Tumors | Normals |
+|------|---------|
+SLX-18967.UDP0126.HT3G5DMXX.s_1| SLX-18967.UDP0129.HT3G5DMXX.s_1 |
+|------------------------------|---------------------------------|
+SLX-18967.UDP0146.HT3G5DMXX.s_1| SLX-18967.UDP0149.HT3G5DMXX.s_1 |
+|------------------------------|---------------------------------|
 
-   * - Heading TUMORS
-    -  Heading NORMALS
-   * - Row 1, SLX-18967.UDP0126.HT3G5DMXX.s_1
-     - Row 1, SLX-18967.UDP0129.HT3G5DMXX.s_1
-   * - Row 2, SLX-18967.UDP0146.HT3G5DMXX.s_1
-     - Row 2, SLX-18967.UDP0149.HT3G5DMXX.s_1
 
 You will need to edit the names and directory of your genome, your genome index, GTF, adapters, read groups in the GENOME, INDEX, GTF, ADAPTERS,  and RG entries in the *config file* respectively. 
 You will also need to have your DBSNP vcf, indels vc, gold standard vcfs, and AF only gnomAD in the DBSNP, INDELS, GOLD_STANDARD, and AFONLYGNOMAD entries respectively  in the *config file*. If you are using human genome, this can be pulled from broadinstitute Get the latest news at `Resource Bundle`_.
