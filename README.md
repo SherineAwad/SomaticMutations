@@ -106,7 +106,7 @@ You can try the following to keep going if any issues happen, like no variants i
     snakemake -j 10 --keep-going --stats run.stats
 
 
-### Citation 
+### Citations 
 
 If you use this pipeline, please cite us as follows: 
 
