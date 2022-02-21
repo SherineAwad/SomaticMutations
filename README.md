@@ -18,9 +18,9 @@ You can run the pipeline in -use-conda mode to pull these tools automatically. S
 
 ### Edit config file 
 
-You will need to edit the *config file* to match your samples and paramteres. 
+You will need to edit the *config file* to match your samples and parameters. 
 
-The pipeline expects samples with suffix ".r_1.fq.gz" and ".r_2.fq.gz" if samples are paired-end.
+The pipeline expects samples with suffix ".r_1.fq.gz" and ".r_2.fq.gz" if the samples are paired-end.
 Any prefix before this suffix is the sample name and to be written in the "samples.tsv". For single-end reads, the samples suffix is ".fq.gz" and any prefix before this suffix is written in the **"samples.tsv"**.
 For example, if your sample name is sample1.s_1.r_1.fq.gz, then your sample name in the samples file should be sample1.s_1.
 
