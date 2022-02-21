@@ -66,6 +66,7 @@ if config['PAIRED']:
             gtf = config['GTF'],
             prefix = "{sample}_",
             index = config['INDEX']
+       conda: 'env/env-align.yaml'
        shell:
             """
             STAR --genomeDir {params.index} --runThreadN {params.threads} --readFilesCommand zcat --readFilesIn {input.r1} {input.r2}  --outFileNamePrefix {params.prefix} --sjdbGTFfile {params.gtf}  --twopassMode Basic
@@ -88,6 +89,7 @@ else:
              "galore/{sample}_trimmed.fq.gz"
          output:
              "{sample}_Aligned.out.sam"
+         conda: 'env/env-align.yaml'
          params:
             threads = config['THREADS'],
             gtf = config['GTF'],
@@ -117,6 +119,7 @@ rule deduplicate:
     output: 
         "{sample}.dedupped.bam", 
         "{sample}.output.metrics"
+    conda: "env/env-picard.yaml"
     shell: 
         """
         picard MarkDuplicates I={input} O={output[0]}  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={output[1]} 
@@ -133,6 +136,7 @@ rule recalibrate_a:
         GOLD_STANDARD = config['GOLD_STANDARD'] 
     output:
        "{sample}.recal_data.table"
+    conda: 'env/env-gatk.yaml'
     shell: 
        """
        gatk BaseRecalibrator -I {input} -R {params.genome}  --known-sites {params.DBSNP} --known-sites {params.INDELS} --known-sites {params.GOLD_STANDARD} -O {output} 
@@ -146,6 +150,7 @@ rule recalibrate_b:
        genome= config['GENOME'], 
     output: 
        "{sample}.recalibrated.bam"
+    conda: 'env/env-gatk.yaml'
     shell: 
       """ 
         gatk ApplyBQSR -I {input[0]} -R {params.genome} --bqsr-recal-file {input[1]} --disable-sequence-dictionary-validation -O {output}
@@ -160,6 +165,7 @@ rule Mutect2:
         prefix = "{sample}"
      output: 
          "{sample}_pon.vcf.gz"
+     conda: 'env/env-gatk.yaml'
      shell:
         """
         gatk Mutect2 -R {params.genome}  -I {input} -tumor {params.prefix} --max-mnp-distance 0 --germline-resource {params.AFONLYGNOMAD} -O {output}
@@ -175,6 +181,7 @@ rule PON_DB:
          I =  lambda w: "-V " + " -V ".join(expand("{sample}_pon.vcf.gz", sample =NORMALS))
      output: 
         pon_db = config['PON_DB']
+     conda: 'env/env-gatk.yaml'
      shell:
          """
          gatk --java-options {params.mem}  GenomicsDBImport -R {params.genome} --genomicsdb-workspace-path {output.pon_db} -L {params.intervals} {params.I} 
@@ -187,7 +194,8 @@ rule panel_normals:
        normal_panel= config['NORMALS_PANEL']
     params:
        AFONLYGNOMAD = config['AFONLYGNOMAD'],
-       genome= config['GENOME'],
+       genome= config['GENOME']
+    conda: 'env/env-gatk.yaml'
     shell:
        """
        gatk CreateSomaticPanelOfNormals -R {params.genome} --germline-resource {params.AFONLYGNOMAD} -V gendb://{input.pon_db} -O {output} 
@@ -199,10 +207,10 @@ rule somatic_call:
      params:
         genome= config['GENOME'],
         AFONLYGNOMAD = config['AFONLYGNOMAD'],
-        #pon=config['NORMALS_PANEL'],
         prefix = lambda wildcards: dict[wildcards.sample] 
      output: 
          "{sample}_somatics.vcf.gz"
+     conda: 'env/env-gatk.yaml'
      shell: 
         """
          gatk Mutect2 -R {params.genome} -I {input.tumor} -I {input.normal} -normal {params.prefix} --germline-resource {params.AFONLYGNOMAD}  --panel-of-normals {input.pon} -O {output}
@@ -214,6 +222,7 @@ rule SelectVariants:
       genome = config['GENOME']
    output: 
        config['GNOMAD_BIALLELIC']
+   conda: 'env/env-gatk.yaml'
    shell: 
       """
        gatk SelectVariants -R {params.genome} -V {params.gnomad} --restrict-alleles-to BIALLELIC -O {output}
@@ -227,6 +236,7 @@ rule GetPileupSummaries:
         config['INTERVALS'] 
    output: 
        "{sample}_getpileupsummaries.table"
+   conda: 'env/env-gatk.yaml'
    shell: 
        """
         gatk GetPileupSummaries -I {input[0]} -V {input[1]} -L {params} -O {output}
@@ -237,6 +247,7 @@ rule CalculateContamination:
        "{sample}_getpileupsummaries.table"
     output:
        "{sample}_tumor_calculatecontamination.table"
+    conda: 'env/env-gatk.yaml'
     shell: 
         """
         gatk CalculateContamination -I {input} -O {output}
@@ -250,6 +261,7 @@ rule FilterMutectCalls:
       genome= config['GENOME'] 
     output: 
        "{sample}_somatic_oncefiltered.vcf.gz"
+    conda: 'env/env-gatk.yaml'
     shell: 
       """
        gatk FilterMutectCalls -R {params} -V {input[1]} --contamination-table {input[0]} -O {output} 

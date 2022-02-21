@@ -7,6 +7,15 @@ Snakemake Workflow for somatic mutation calling
 
 The is GATK4/Mutect2 pipeline for Somatic Mutation. 
 
+#### Requirments 
+
+- trim-galore=0.6.6
+- star=2.7.10a
+- picard=2.25.6
+- gatk4=4.2.0.0
+
+You can run the pipeline in -use-conda mode to pull these tools automatically. See use conde section below.
+
 #### Edit config file 
 
 You will need to edit the *config file* to match your samples and paramteres. 
