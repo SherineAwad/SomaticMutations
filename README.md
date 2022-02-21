@@ -28,9 +28,7 @@ SLX-18967.UDP0146.HT3G5DMXX.s_1| SLX-18967.UDP0149.HT3G5DMXX.s_1 |
 
 
 You will need to edit the names and directory of your genome, your genome index, GTF, adapters, read groups in the GENOME, INDEX, GTF, ADAPTERS,  and RG entries in the *config file* respectively. 
-You will also need to have your DBSNP vcf, indels vc, gold standard vcfs, and AF only gnomAD in the DBSNP, INDELS, GOLD_STANDARD, and AFONLYGNOMAD entries respectively  in the *config file*. If you are using human genome, this can be pulled from broadinstitute: 
-
-[Broad institute Resource Bundle](https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle)
+You will also need to have your DBSNP vcf, indels vc, gold standard vcfs, and AF only gnomAD in the DBSNP, INDELS, GOLD_STANDARD, and AFONLYGNOMAD entries respectively  in the *config file*. If you are using human genome, this can be pulled from broadinstitute: [Broad institute Resource Bundle](https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle)
 
 
 You need to update your interval list, by editing the **intervals.list** file to list only the chromosomes of interest. You can change the name of this file by editing the *config file* entry **INTERVALS**.
